@@ -11,8 +11,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $BINARY
 FROM registry.freedesktop.org/drm/igt-gpu-tools/igt:master
 
 ARG BINARY=app
-ENV args=""
 
 COPY --from=buildenv /app/$BINARY /app/run
 
-ENTRYPOINT [ "/app/run", "${args}" ]
+ENTRYPOINT [ "/app/run"]
