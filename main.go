@@ -19,6 +19,7 @@ func main() {
 	refresh := flag.String("refresh", "5s", "Refresh period for metrics updates.")
 	port := flag.String("port", "9091", "Port to serve metrics")
 	loglvl := flag.String("log-level", "INFO", "Log level")
+	args := flag.String("additional-args", "", "Additional args to pass to gatherer command.")
 	flag.Parse()
 
 	switch strings.ToUpper(*loglvl) {
@@ -37,7 +38,7 @@ func main() {
 	if runtime.GOOS == "windows" {
 		windows.NewGatherer(*device, *refresh).Start(context.Background())
 	} else {
-		linux.NewGatherer(*device, *refresh).Start(context.Background())
+		linux.NewGatherer(*device, *refresh, *args).Start(context.Background())
 	}
 
 	log.Infof("Starting GPU metrics exporter on port %s", *port)

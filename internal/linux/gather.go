@@ -34,23 +34,25 @@ type GPUData struct {
 }
 
 type MetricGatherer struct {
-	Device        string
-	RefreshPeriod time.Duration
+	Device         string
+	RefreshPeriod  time.Duration
+	AdditionalArgs string
 }
 
-func NewGatherer(device string, refresh string) *MetricGatherer {
+func NewGatherer(device, refresh, args string) *MetricGatherer {
 	d, err := time.ParseDuration(refresh)
 	if err != nil {
 		log.Fatalf("bad duration passed to gatherer: %v", err)
 	}
 	return &MetricGatherer{
-		Device:        device,
-		RefreshPeriod: d,
+		Device:         device,
+		RefreshPeriod:  d,
+		AdditionalArgs: args,
 	}
 }
 
 func (g *MetricGatherer) Start(ctx context.Context) error {
-	cmd := fmt.Sprintf("intel_gpu_top -J -s %d", g.RefreshPeriod.Milliseconds())
+	cmd := fmt.Sprintf("intel_gpu_top -J -s %d %s", g.RefreshPeriod.Milliseconds(), g.AdditionalArgs)
 	if g.Device != "" {
 		cmd += " -d " + g.Device
 	}
