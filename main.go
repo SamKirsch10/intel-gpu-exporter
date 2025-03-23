@@ -31,8 +31,10 @@ func main() {
 		log.SetLevel(log.ErrorLevel)
 	case "DEBUG":
 		log.SetLevel(log.DebugLevel)
+	case "TRACE":
+		log.SetLevel(log.TraceLevel)
 	default:
-		panic("unknown log level. Options are 'DEBUG', 'INFO', 'WARN', 'ERROR'")
+		panic("unknown log level. Options are 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'")
 	}
 
 	if runtime.GOOS == "windows" {

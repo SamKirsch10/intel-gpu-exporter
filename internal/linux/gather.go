@@ -88,16 +88,30 @@ func (g *MetricGatherer) do(ctx context.Context, procStdout io.ReadCloser) {
 		case <-t.C:
 			var data GPUData
 			var buffer bytes.Buffer
+			var (
+				objectFound bool
+				endFound    bool
+			)
 			for scanner.Scan() {
 				line := scanner.Text()
-				buffer.WriteString(line + "\n")
-				if json.Valid(buffer.Bytes()) {
+				log.Tracef("got back from cmd: %s", line)
+
+				if line == "{" {
+					objectFound = true
+				} else if line == "}" {
+					endFound = true
+				}
+				if objectFound {
+					buffer.WriteString(line + "\n")
+				}
+				if endFound {
 					err := json.Unmarshal([]byte(buffer.Bytes()), &data)
 					if err != nil {
 						log.Errorf("JSON decode error: %v", err)
 						continue
 					}
 					buffer.Reset()
+					objectFound, endFound = false, false
 					updateMetrics(data)
 				}
 			}
@@ -106,6 +120,7 @@ func (g *MetricGatherer) do(ctx context.Context, procStdout io.ReadCloser) {
 }
 
 func updateMetrics(data GPUData) {
+	log.Debugf("got raw data from top cmd: %v", data)
 	for engine, metrics := range data.Engines {
 		if _, ok := igpuEnginesMetrics[engine]; !ok {
 			igpuEnginesMetrics[engine] = make(map[string]prometheus.Gauge)
