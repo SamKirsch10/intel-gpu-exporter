@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 
@@ -15,11 +16,11 @@ import (
 
 func main() {
 
-	device := flag.String("device", "", "Specify device for intel_gpu_top")
-	refresh := flag.String("refresh", "5s", "Refresh period for metrics updates.")
-	port := flag.String("port", "9091", "Port to serve metrics")
-	loglvl := flag.String("log-level", "INFO", "Log level")
-	args := flag.String("additional-args", "", "Additional args to pass to gatherer command.")
+	device := flag.String("device", getEnvOrDefault("EXPORTER_DEVICE", ""), "Specify device for intel_gpu_top")
+	refresh := flag.String("refresh", getEnvOrDefault("EXPORTER_REFRESH", "5s"), "Refresh period for metrics updates.")
+	port := flag.String("port", getEnvOrDefault("EXPORTER_PORT", "9091"), "Port to serve metrics")
+	loglvl := flag.String("log-level", getEnvOrDefault("EXPORTER_LOGLVL", "INFO"), "Log level")
+	args := flag.String("additional-args", getEnvOrDefault("EXPORTER_ARGS", ""), "Additional args to pass to gatherer command.")
 	flag.Parse()
 
 	switch strings.ToUpper(*loglvl) {
@@ -46,4 +47,12 @@ func main() {
 	log.Infof("Starting GPU metrics exporter on port %s", *port)
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
+}
+
+func getEnvOrDefault(key, d string) string {
+	e := os.Getenv(key)
+	if e == "" {
+		return d
+	}
+	return e
 }
