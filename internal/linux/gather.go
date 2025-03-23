@@ -131,7 +131,7 @@ func updateMetrics(data GPUData) {
 			}
 			if _, ok := igpuEnginesMetrics[engine][m]; !ok {
 				igpuEnginesMetrics[engine][m] = prometheus.NewGauge(prometheus.GaugeOpts{
-					Name: fmt.Sprintf("igpu_engine_%s_%s_percent", engine, m),
+					Name: strings.ToLower(fmt.Sprintf("igpu_engines_%s_%s_percent", engine, m)),
 				})
 				prometheus.MustRegister(igpuEnginesMetrics[engine][m])
 			}
